@@ -51,7 +51,7 @@ def upload_handler(bot, update):
         if not update.message.document.mime_type.startswith('image/'):
             return update.message.reply_text('File has an invalid extension.', quote=True)
     except:
-        file_id = update.message.photo.file_id
+        file_id = update.message.photo[-1].file_id
     download(bot, file_id)
     uploader = upload(file_id)
     remove('/tmp/smms-bot/%s' % file_id)
