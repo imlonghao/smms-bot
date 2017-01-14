@@ -48,7 +48,9 @@ def error_handler(bot, update, error):
 def upload_handler(bot, update):
     try:
         file_id = update.message.document.file_id
-    except KeyError:
+        if not update.message.document.mime_type.startswith('image/'):
+            return update.message.reply_text('File has an invalid extension.', quote=True)
+    except:
         file_id = update.message.photo.file_id
     download(bot, file_id)
     uploader = upload(file_id)
