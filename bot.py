@@ -15,9 +15,10 @@
 # under the License.
 
 import logging
-from config import TG_TOKEN
+from config import BOTAN_TOKEN, TG_TOKEN
 from requests_futures.sessions import FuturesSession
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.contrib.botan import Botan
 from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
 from os import mkdir, remove
@@ -46,6 +47,7 @@ def error_handler(bot, update, error):
 
 @run_async
 def upload_handler(bot, update):
+    botan.track(update.message, 'upload')
     try:
         file_id = update.message.document.file_id
         if not update.message.document.mime_type.startswith('image/'):
@@ -65,6 +67,7 @@ def upload_handler(bot, update):
 
 @run_async
 def callback_handler(bot, update):
+    botan.track(update.message, 'delete')
     key = update.callback_query.data
     requests.get('https://sm.ms/api/delete/%s' % key)
     update.callback_query.message.edit_text('Photo Deleted!')
@@ -76,6 +79,7 @@ if __name__ == '__main__':
     except FileExistsError:
         pass
     requests = FuturesSession(max_workers=1)
+    botan = Botan(BOTAN_TOKEN)
     updater = Updater(TG_TOKEN, workers=1)
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.document, upload_handler))
