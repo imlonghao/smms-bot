@@ -15,4 +15,3 @@
 # under the License.
 
 TG_TOKEN = ''
-BOTAN_TOKEN = ''
