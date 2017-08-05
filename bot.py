@@ -76,8 +76,8 @@ if __name__ == '__main__':
         mkdir('/tmp/smms-bot')
     except FileExistsError:
         pass
-    requests = FuturesSession(max_workers=1)
-    updater = Updater(TG_TOKEN, workers=1)
+    requests = FuturesSession(max_workers=10)
+    updater = Updater(TG_TOKEN, workers=10)
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.document, upload_handler))
     dp.add_handler(MessageHandler(Filters.photo, upload_handler))
