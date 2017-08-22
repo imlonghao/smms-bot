@@ -15,13 +15,12 @@
 # under the License.
 
 import logging
-from config import TG_TOKEN
 from requests_futures.sessions import FuturesSession
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.contrib.botan import Botan
 from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
-from os import mkdir, remove
+from os import mkdir, remove, environ
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
@@ -77,7 +76,7 @@ if __name__ == '__main__':
     except FileExistsError:
         pass
     requests = FuturesSession(max_workers=10)
-    updater = Updater(TG_TOKEN, workers=10)
+    updater = Updater(environ['TG_TOKEN'], workers=10)
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.document, upload_handler))
     dp.add_handler(MessageHandler(Filters.photo, upload_handler))

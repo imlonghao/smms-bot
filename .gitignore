@@ -87,6 +87,3 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-# Config File
-config.py
