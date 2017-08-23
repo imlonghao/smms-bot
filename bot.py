@@ -25,16 +25,19 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+TEMP_DIR = '/tmp/smms-bot/'
+API_URL = 'https://sm.ms/api/'
+
 
 def download(bot, file_id):
-    bot.getFile(file_id).download('/tmp/smms-bot/%s' % file_id)
+    bot.getFile(file_id).download(TEMP_DIR + file_id)
 
 
 def upload(file_id):
     f = {
-        'smfile': open('/tmp/smms-bot/%s' % file_id, 'rb')
+        'smfile': open(TEMP_DIR + file_id, 'rb')
     }
-    r = requests.post('https://sm.ms/api/upload', files=f)
+    r = requests.post(API_URL + 'upload', files=f)
     return r.result().json()
 
 
@@ -53,7 +56,7 @@ def upload_handler(bot, update):
         file_id = update.message.photo[-1].file_id
     download(bot, file_id)
     uploader = upload(file_id)
-    remove('/tmp/smms-bot/%s' % file_id)
+    remove(TEMP_DIR + file_id)
     if uploader['code'] == 'error':
         update.message.reply_text(uploader['msg'], quote=True)
     else:
@@ -65,13 +68,13 @@ def upload_handler(bot, update):
 @run_async
 def callback_handler(bot, update):
     key = update.callback_query.data
-    requests.get('https://sm.ms/api/delete/%s' % key)
+    requests.get(API_URL + 'delete/%s' % key)
     update.callback_query.message.edit_text('Photo Deleted!')
 
 
 if __name__ == '__main__':
     try:
-        mkdir('/tmp/smms-bot')
+        mkdir(TEMP_DIR)
     except FileExistsError:
         pass
     requests = FuturesSession(max_workers=10)
