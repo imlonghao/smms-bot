@@ -17,7 +17,6 @@
 import logging
 from requests_futures.sessions import FuturesSession
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.contrib.botan import Botan
 from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler
 from telegram.ext.dispatcher import run_async
 from os import mkdir, remove, environ
