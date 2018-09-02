@@ -51,8 +51,9 @@ def upload_handler(bot, update):
     try:
         file_id = update.message.document.file_id
         if not update.message.document.mime_type.startswith('image/'):
-            return update.message.reply_text('File has an invalid extension.', quote=True)
-    except:
+            return update.message.reply_text(
+                'File has an invalid extension.', quote=True)
+    except BaseException:
         file_id = update.message.photo[-1].file_id
     download(bot, file_id)
     uploader = upload(file_id)
@@ -60,7 +61,8 @@ def upload_handler(bot, update):
     if uploader['code'] == 'error':
         update.message.reply_text(uploader['msg'], quote=True)
     else:
-        kb = [[InlineKeyboardButton('Click Here To Delete', callback_data=uploader['data']['hash'])]]
+        kb = [[InlineKeyboardButton(
+            'Click Here To Delete', callback_data=uploader['data']['hash'])]]
         update.message.reply_text('`%s`' % uploader['data']['url'], quote=True, parse_mode='markdown',
                                   disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(kb))
 
