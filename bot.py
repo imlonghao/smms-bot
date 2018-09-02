@@ -22,7 +22,7 @@ from telegram.ext.dispatcher import run_async
 from os import mkdir, remove, environ
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TEMP_DIR = '/tmp/smms-bot/'
