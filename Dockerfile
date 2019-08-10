@@ -6,6 +6,7 @@ RUN apk add upx && \
     GO111MODULE=on go build -mod=vendor -ldflags="-s -w" -o /app && \
     upx --lzma --best /app
 
-FROM gcr.io/distroless/base
-COPY --from=builder /app .
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /app /
 CMD ["/app"]
