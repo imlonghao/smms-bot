@@ -1,14 +1,14 @@
 trigger:
   branches:
     include:
-      - master
+      - v2
   paths:
     exclude:
       - README.md
 pr:
   branches:
     include:
-      - master
+      - v2
   paths:
     exclude:
       - README.md
