@@ -82,7 +82,11 @@ func main() {
 							apis[update.Message.From.ID] = update.Message.CommandArguments()
 							msg.Text = "API token saved."
 						case "get":
-							msg.Text = apis[update.Message.From.ID]
+							text := apis[update.Message.From.ID]
+							if text == "" {
+								text = "API token empty."
+							}
+							msg.Text = text
 						}
 						msg.ReplyToMessageID = update.Message.MessageID
 						if _, err := bot.Send(msg); err != nil {
