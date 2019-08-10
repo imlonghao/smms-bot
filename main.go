@@ -18,7 +18,7 @@ func upload(token, url string) (string, string) {
 	}
 	defer resp.Body.Close()
 	client := smms.Client{Token: token}
-	json, err := client.Upload(resp.Body, "1.png")
+	json, err := client.Upload(resp.Body, "uploaded_by_sm_ms_bot.png")
 	if err != nil {
 		return "err", "Fail to upload the image"
 	}
