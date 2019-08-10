@@ -48,6 +48,14 @@ func uploadHandler(url string, token string, update tgbotapi.Update) tgbotapi.Me
 	return msg
 }
 
+func sendError(update tgbotapi.Update, bot *tgbotapi.BotAPI, err string) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, err)
+	msg.ReplyToMessageID = update.Message.MessageID
+	if _, err := bot.Send(msg); err != nil {
+		log.Warnf("fail to send msg, %v", err)
+	}
+}
+
 func main() {
 	apis := make(map[int]string)
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
@@ -80,21 +88,13 @@ func main() {
 			// 文件形式的图片
 			if update.Message.Document != nil {
 				if !strings.Contains(update.Message.Document.MimeType, "image/") {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "File has an invalid extension.")
-					msg.ReplyToMessageID = update.Message.MessageID
-					if _, err := bot.Send(msg); err != nil {
-						log.Warnf("fail to send msg, %v", err)
-					}
+					sendError(update, bot, "File has an invalid extension.")
 					continue
 				}
 				fileID := update.Message.Document.FileID
 				url, err := bot.GetFileDirectURL(fileID)
 				if err != nil {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Failed to download the image.")
-					msg.ReplyToMessageID = update.Message.MessageID
-					if _, err := bot.Send(msg); err != nil {
-						log.Warnf("fail to send msg, %v", err)
-					}
+					sendError(update, bot, "Failed to download the image.")
 					continue
 				}
 				msg := uploadHandler(url, apis[update.Message.From.ID], update)
@@ -109,11 +109,7 @@ func main() {
 				fileID := photo[len(photo)-1].FileID
 				url, err := bot.GetFileDirectURL(fileID)
 				if err != nil {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Failed to download the image.")
-					msg.ReplyToMessageID = update.Message.MessageID
-					if _, err := bot.Send(msg); err != nil {
-						log.Warnf("fail to send msg, %v", err)
-					}
+					sendError(update, bot, "Failed to download the image.")
 					continue
 				}
 				msg := uploadHandler(url, apis[update.Message.From.ID], update)
