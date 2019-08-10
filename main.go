@@ -67,72 +67,84 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
-	for update := range updates {
-		if update.Message != nil {
-			// 命令
-			if update.Message.IsCommand() {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-				switch update.Message.Command() {
-				case "set":
-					apis[update.Message.From.ID] = update.Message.CommandArguments()
-					msg.Text = "API token saved."
-				case "get":
-					msg.Text = apis[update.Message.From.ID]
+	if err != nil {
+		log.Panic("Fail to get Telegram updates")
+	}
+	for {
+		select {
+		case update := <-updates:
+			go func() {
+				if update.Message != nil {
+					// 命令
+					if update.Message.IsCommand() {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+						switch update.Message.Command() {
+						case "set":
+							apis[update.Message.From.ID] = update.Message.CommandArguments()
+							msg.Text = "API token saved."
+						case "get":
+							msg.Text = apis[update.Message.From.ID]
+						}
+						msg.ReplyToMessageID = update.Message.MessageID
+						if _, err := bot.Send(msg); err != nil {
+							log.Warnf("fail to send msg, %v", err)
+						}
+						return
+					}
+					// 文件形式的图片
+					if update.Message.Document != nil {
+						if !strings.Contains(update.Message.Document.MimeType, "image/") {
+							sendError(update, bot, "File has an invalid extension.")
+							return
+						}
+						fileID := update.Message.Document.FileID
+						url, err := bot.GetFileDirectURL(fileID)
+						if err != nil {
+							sendError(update, bot, "Failed to download the image.")
+							return
+						}
+						msg := uploadHandler(url, apis[update.Message.From.ID], update)
+						if _, err := bot.Send(msg); err != nil {
+							log.Warnf("fail to send msg, %v", err)
+						}
+						return
+					}
+					// 图片
+					if update.Message.Photo != nil {
+						photo := (*update.Message.Photo)
+						fileID := photo[len(photo)-1].FileID
+						url, err := bot.GetFileDirectURL(fileID)
+						if err != nil {
+							sendError(update, bot, "Failed to download the image.")
+							return
+						}
+						msg := uploadHandler(url, apis[update.Message.From.ID], update)
+						if _, err := bot.Send(msg); err != nil {
+							log.Warnf("fail to send msg, %v", err)
+						}
+						return
+					}
 				}
-				msg.ReplyToMessageID = update.Message.MessageID
-				if _, err := bot.Send(msg); err != nil {
-					log.Warnf("fail to send msg, %v", err)
+				// Callback 删除图片
+				if update.CallbackQuery != nil {
+					client := smms.Client{}
+					if update.CallbackQuery.Data != "err" {
+						if _, err := client.Delete(update.CallbackQuery.Data); err != nil {
+							log.Warnf("fail to delete the image, %v", err)
+						}
+					}
+					edit := tgbotapi.EditMessageTextConfig{
+						BaseEdit: tgbotapi.BaseEdit{
+							ChatID:    int64(update.CallbackQuery.From.ID),
+							MessageID: update.CallbackQuery.Message.MessageID,
+						},
+						Text: "Photo Deleted!",
+					}
+					if _, err := bot.Send(edit); err != nil {
+						log.Warnf("fail to send msg, %v", err)
+					}
 				}
-				continue
-			}
-			// 文件形式的图片
-			if update.Message.Document != nil {
-				if !strings.Contains(update.Message.Document.MimeType, "image/") {
-					sendError(update, bot, "File has an invalid extension.")
-					continue
-				}
-				fileID := update.Message.Document.FileID
-				url, err := bot.GetFileDirectURL(fileID)
-				if err != nil {
-					sendError(update, bot, "Failed to download the image.")
-					continue
-				}
-				msg := uploadHandler(url, apis[update.Message.From.ID], update)
-				if _, err := bot.Send(msg); err != nil {
-					log.Warnf("fail to send msg, %v", err)
-				}
-				continue
-			}
-			// 图片
-			if update.Message.Photo != nil {
-				photo := (*update.Message.Photo)
-				fileID := photo[len(photo)-1].FileID
-				url, err := bot.GetFileDirectURL(fileID)
-				if err != nil {
-					sendError(update, bot, "Failed to download the image.")
-					continue
-				}
-				msg := uploadHandler(url, apis[update.Message.From.ID], update)
-				if _, err := bot.Send(msg); err != nil {
-					log.Warnf("fail to send msg, %v", err)
-				}
-				continue
-			}
-		}
-		// Callback 删除图片
-		if update.CallbackQuery != nil {
-			client := smms.Client{}
-			if update.CallbackQuery.Data != "err" {
-				client.Delete(update.CallbackQuery.Data)
-			}
-			edit := tgbotapi.EditMessageTextConfig{
-				BaseEdit: tgbotapi.BaseEdit{
-					ChatID:    int64(update.CallbackQuery.From.ID),
-					MessageID: update.CallbackQuery.Message.MessageID,
-				},
-				Text: "Photo Deleted!",
-			}
-			bot.Send(edit)
+			}()
 		}
 	}
 }
