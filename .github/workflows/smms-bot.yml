@@ -1,0 +1,23 @@
+name: imlonghao/smms-bot:latest
+
+on:
+  push:
+    branches:
+      - v2
+  paths:
+    exclude:
+      - README.md
+
+jobs:
+  build:
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@2.3
+        with:
+          name: imlonghao/smms-bot:latest
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
