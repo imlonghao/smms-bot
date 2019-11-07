@@ -79,9 +79,11 @@ func main() {
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 						switch update.Message.Command() {
 						case "set":
+							go track("set_token")
 							apis[update.Message.From.ID] = update.Message.CommandArguments()
 							msg.Text = "API token saved."
 						case "get":
+							go track("get_token")
 							text := apis[update.Message.From.ID]
 							if text == "" {
 								text = "API token empty."
@@ -96,6 +98,7 @@ func main() {
 					}
 					// 文件形式的图片
 					if update.Message.Document != nil {
+						go track("upload_file")
 						if !strings.Contains(update.Message.Document.MimeType, "image/") {
 							sendError(update, bot, "File has an invalid extension.")
 							return
@@ -114,6 +117,7 @@ func main() {
 					}
 					// 图片
 					if update.Message.Photo != nil {
+						go track("upload_image")
 						photo := (*update.Message.Photo)
 						fileID := photo[len(photo)-1].FileID
 						url, err := bot.GetFileDirectURL(fileID)
@@ -130,6 +134,7 @@ func main() {
 				}
 				// Callback 删除图片
 				if update.CallbackQuery != nil {
+					go track("delete_image")
 					client := smms.Client{}
 					if update.CallbackQuery.Data != "err" {
 						if _, err := client.Delete(update.CallbackQuery.Data); err != nil {
