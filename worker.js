@@ -142,7 +142,7 @@ class Telegram {
 class Smms {
   constructor(token) {
     this.token = token;
-    this.api = 'https://sm.ms/api/v2/'
+    this.api = 'https://sm.ms/api/v2'
   }
   async upload(image) {
     const f = fd(image);
