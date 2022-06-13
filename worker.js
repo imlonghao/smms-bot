@@ -61,7 +61,7 @@ async function handleRequest(request) {
   }
   // 图片
   if (message !== undefined && message.photo !== undefined) {
-    const fileID = message.photo[message.photo.length-1].file_id
+    const fileID = message.photo[message.photo.length - 1].file_id
     const filePath = await bot.getFile(fileID)
     const filePathJSON = await filePath.json()
     const url = `https://api.telegram.org/file/bot${TOKEN}/${filePathJSON.result.file_path}`
@@ -169,7 +169,7 @@ class Smms {
   }
 }
 
-var _appendBuffer = function(buffer1, buffer2) {
+var _appendBuffer = function (buffer1, buffer2) {
   var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
   tmp.set(new Uint8Array(buffer1), 0);
   tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
