@@ -153,7 +153,7 @@ class Smms {
     if (this.token !== null) {
       headers.append('Authorization', this.token)
     }
-    return await fetch(this.api + '/upload/', {
+    return await fetch(this.api + '/upload', {
       method: 'POST',
       headers: headers,
       body: f
