@@ -80,6 +80,7 @@ async function handleRequest(request) {
   }
   // Callback 删除图片
   if (update.callback_query !== undefined) {
+    smms = new Smms(await USERTOKEN.get(update.callback_query.from.id));
     await smms.delete(update.callback_query.data)
     return await bot.editMessageText(update.callback_query.message.chat.id, update.callback_query.message.message_id, null, "Photo Deleted!")
   }
@@ -163,6 +164,9 @@ class Smms {
     const headers = new Headers({
       'User-Agent': 'sm_ms_bot/cloudflareworkers (https://github.com/imlonghao/smms-bot)'
     });
+    if (this.token !== null) {
+      headers.append('Authorization', this.token)
+    }
     return await fetch(this.api + '/delete/' + hash, {
       headers: headers
     })
